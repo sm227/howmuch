@@ -6,7 +6,6 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
     const body = await request.json();
     const { date, startTime, endTime, breakTime, wage, totalWage } = body;
 
