@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { prisma } from './prisma';
 
 export async function getUserFromToken(request: Request) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 
   if (!token) {

@@ -283,7 +283,7 @@ export default function WorkRegisterModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="space-y-4">
+      <div className="space-y-4 p-4">
         <h2 className="text-xl font-bold">
           {isEditMode ? '근무 수정' : '근무 등록'}
         </h2>
@@ -307,7 +307,8 @@ export default function WorkRegisterModal({
               시작 시간
             </label>
             <input
-              type="text"
+              type="tel"
+              inputMode="numeric"
               value={startTime}
               onChange={(e) => handleTimeInput(e, setStartTime)}
               placeholder="0900"
@@ -325,7 +326,8 @@ export default function WorkRegisterModal({
               종료 시간
             </label>
             <input
-              type="text"
+              type="tel"
+              inputMode="numeric"
               value={endTime}
               onChange={(e) => handleTimeInput(e, setEndTime)}
               placeholder="1800"

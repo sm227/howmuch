@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { cookies } from 'next/headers';
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    
     const body = await request.json();
     const { date, startTime, endTime, breakTime, wage, totalWage } = body;
 
@@ -37,11 +41,9 @@ export async function PUT(
 
     return NextResponse.json(workRecord);
   } catch (error) {
-    console.error('Failed to update work record:', error);
-    return NextResponse.json(
-      { error: 'Failed to update work record' },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+    });
   }
 }
 
@@ -50,6 +52,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    
     const id = parseInt(params.id);
     await prisma.workRecord.delete({
       where: { id },

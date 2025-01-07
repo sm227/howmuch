@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getUserFromToken } from '@/lib/auth';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    
     const user = await getUserFromToken(request);
     if (!user) {
       return NextResponse.json(
@@ -55,6 +59,9 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    
     const user = await getUserFromToken(request);
     if (!user) {
       return NextResponse.json(
