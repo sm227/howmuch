@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  password      String
+  name          String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  workRecords   WorkRecord[]
+  settings      Settings?
+}
+
+model WorkRecord {
+  id         String   @id @default(cuid())
+  date        DateTime
+  startTime   DateTime
+  endTime     DateTime
+  breakTime   Int
+  wage        Int      @default(9860)
+  totalWage   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Settings {
+  id            String   @id @default(cuid())
+  hourlyWage  Int      @default(9860)
+  autoBreakTime Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+} 
