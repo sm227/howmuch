@@ -5,7 +5,6 @@ import bcrypt from 'bcryptjs';
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
-    console.log('Login attempt for email:', email);
 
     const user = await prisma.user.findUnique({
       where: { email },
@@ -28,43 +27,36 @@ export async function POST(request: Request) {
     }
 
     // 응답 생성
-    const response = new NextResponse(
-      JSON.stringify({ 
-        success: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name
-        }
-      }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    const response = NextResponse.json({ 
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name
       }
-    );
+    });
 
-    // 간단한 로그인 쿠키 설정
+    // 쿠키 설정 수정
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7일
+    };
+
+    // isLoggedIn 쿠키 설정
     response.cookies.set({
       name: 'isLoggedIn',
       value: 'true',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7일
+      ...cookieOptions
     });
 
-    // userId도 함께 저장 (사용자 정보 조회용)
+    // userId 쿠키 설정
     response.cookies.set({
       name: 'userId',
       value: user.id,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7일
+      ...cookieOptions
     });
 
     return response;

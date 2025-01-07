@@ -3,11 +3,12 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const isLoggedIn = request.cookies.get('isLoggedIn')?.value === 'true';
+  const userId = request.cookies.get('userId')?.value;
 
   // 로그인/회원가입 페이지는 통과
   if (request.nextUrl.pathname.startsWith('/auth')) {
     // 이미 로그인된 상태면 홈으로 리다이렉트
-    if (isLoggedIn) {
+    if (isLoggedIn && userId) {
       return NextResponse.redirect(new URL('/', request.url));
     }
     return NextResponse.next();
@@ -19,8 +20,12 @@ export async function middleware(request: NextRequest) {
   }
 
   // 로그인되지 않은 경우 로그인 페이지로 리다이렉트
-  if (!isLoggedIn) {
-    return NextResponse.redirect(new URL('/auth/login', request.url));
+  if (!isLoggedIn || !userId) {
+    const response = NextResponse.redirect(new URL('/auth/login', request.url));
+    // 잘못된 쿠키 삭제
+    response.cookies.delete('isLoggedIn');
+    response.cookies.delete('userId');
+    return response;
   }
 
   return NextResponse.next();
