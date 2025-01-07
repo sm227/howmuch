@@ -68,7 +68,8 @@ export async function POST(request: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : undefined // 도메인 설정 추가
     });
 
     console.log('Cookie has been set with token:', token.substring(0, 20) + '...');

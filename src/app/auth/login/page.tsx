@@ -27,16 +27,13 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
-      console.log('Login response:', data);
 
       if (!response.ok) {
         throw new Error(data.error || '로그인에 실패했습니다.');
       }
 
-      // 로그인 성공 시 약간의 지연 후 홈으로 이동
-      await new Promise(resolve => setTimeout(resolve, 500));
-      window.location.replace('/');
-
+      // 로그인 성공 시 홈으로 이동
+      router.push('/');
     } catch (error) {
       console.error('Login error:', error);
       setError(error instanceof Error ? error.message : '로그인에 실패했습니다.');
