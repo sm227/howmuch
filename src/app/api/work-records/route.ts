@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getUserFromToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    
-    const user = await getUserFromToken(request);
-    if (!user) {
+    const isLoggedIn = cookieStore.get('isLoggedIn')?.value === 'true';
+    const userId = cookieStore.get('userId')?.value;
+
+    if (!isLoggedIn || !userId) {
       return NextResponse.json(
         { error: '인증이 필요합니다.' },
         { status: 401 }
@@ -37,7 +36,7 @@ export async function POST(request: Request) {
 
     const workRecord = await prisma.workRecord.create({
       data: {
-        userId: user.id,
+        userId,
         date: workDate,
         startTime: startDateTime,
         endTime: endDateTime,
@@ -57,13 +56,13 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    
-    const user = await getUserFromToken(request);
-    if (!user) {
+    const isLoggedIn = cookieStore.get('isLoggedIn')?.value === 'true';
+    const userId = cookieStore.get('userId')?.value;
+
+    if (!isLoggedIn || !userId) {
       return NextResponse.json(
         { error: '인증이 필요합니다.' },
         { status: 401 }
@@ -71,7 +70,7 @@ export async function GET(request: Request) {
     }
 
     const workRecords = await prisma.workRecord.findMany({
-      where: { userId: user.id },
+      where: { userId },
       orderBy: { date: 'desc' },
     });
 

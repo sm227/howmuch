@@ -6,8 +6,9 @@ export async function POST() {
     { status: 200 }
   );
 
-  // 토큰 쿠키 삭제
-  response.cookies.delete('token');
+  // 로그인 관련 쿠키 모두 삭제
+  response.cookies.delete('isLoggedIn');
+  response.cookies.delete('userId');
 
   return response;
 } 

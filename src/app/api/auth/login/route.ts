@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import * as jose from 'jose';
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +12,6 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      console.log('User not found with email:', email);
       return NextResponse.json(
         { error: '이메일 또는 비밀번호가 일치하지 않습니다.' },
         { status: 401 }
@@ -21,26 +19,13 @@ export async function POST(request: Request) {
     }
 
     const isValid = await bcrypt.compare(password, user.password);
-    console.log('Password validation result:', isValid);
 
     if (!isValid) {
-      console.log('Invalid password for user:', email);
       return NextResponse.json(
         { error: '이메일 또는 비밀번호가 일치하지 않습니다.' },
         { status: 401 }
       );
     }
-
-    console.log('Login successful for user:', email);
-
-    // JWT 토큰 생성
-    const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || 'fallback-secret'
-    );
-    const token = await new jose.SignJWT({ userId: user.id })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setExpirationTime('7d')
-      .sign(secret);
 
     // 응답 생성
     const response = new NextResponse(
@@ -60,19 +45,28 @@ export async function POST(request: Request) {
       }
     );
 
-    // 쿠키 직접 설정
+    // 간단한 로그인 쿠키 설정
     response.cookies.set({
-      name: 'token',
-      value: token,
+      name: 'isLoggedIn',
+      value: 'true',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : undefined // 도메인 설정 추가
+      maxAge: 60 * 60 * 24 * 7, // 7일
     });
 
-    console.log('Cookie has been set with token:', token.substring(0, 20) + '...');
+    // userId도 함께 저장 (사용자 정보 조회용)
+    response.cookies.set({
+      name: 'userId',
+      value: user.id,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7일
+    });
+
     return response;
 
   } catch (error) {
