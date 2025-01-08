@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 응답 생성
+    // 세션 쿠키만 설정
     const response = NextResponse.json({ 
       success: true,
       user: {
@@ -27,23 +27,15 @@ export async function POST(request: Request) {
       }
     });
 
-    // 쿠키 설정 수정
-    const cookieOptions = {
+    // 단순한 세션 쿠키 하나만 설정
+    response.cookies.set('session', user.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
+      sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7일
-    };
+    });
 
-    // isLoggedIn 쿠키 설정
-    response.cookies.set('isLoggedIn', 'true', cookieOptions);
-    
-    // userId 쿠키 설정
-    response.cookies.set('userId', user.id, cookieOptions);
-
-    console.log('Login successful - Cookies set:', response.cookies.getAll());
-    
     return response;
 
   } catch (error) {

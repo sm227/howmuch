@@ -59,10 +59,9 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const isLoggedIn = cookieStore.get('isLoggedIn')?.value === 'true';
-    const userId = cookieStore.get('userId')?.value;
+    const session = cookieStore.get('session')?.value;
 
-    if (!isLoggedIn || !userId) {
+    if (!session) {
       return NextResponse.json(
         { error: '인증이 필요합니다.' },
         { status: 401 }
@@ -70,7 +69,7 @@ export async function GET() {
     }
 
     const workRecords = await prisma.workRecord.findMany({
-      where: { userId },
+      where: { userId: session },
       orderBy: { date: 'desc' },
     });
 
