@@ -13,8 +13,8 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
+    setError('');
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -32,12 +32,9 @@ const LoginPage = () => {
         throw new Error(data.error || '로그인에 실패했습니다.');
       }
 
-      router.push('/');
-      router.refresh();
-      
-    } catch (error) {
-      console.error('로그인 에러:', error);
-      setError(error instanceof Error ? error.message : '로그인에 실패했습니다.');
+      window.location.href = '/';
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '로그인에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }

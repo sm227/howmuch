@@ -10,16 +10,7 @@ export async function POST(request: Request) {
       where: { email },
     });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: '이메일 또는 비밀번호가 일치하지 않습니다.' },
-        { status: 401 }
-      );
-    }
-
-    const isValid = await bcrypt.compare(password, user.password);
-
-    if (!isValid) {
+    if (!user || !await bcrypt.compare(password, user.password)) {
       return NextResponse.json(
         { error: '이메일 또는 비밀번호가 일치하지 않습니다.' },
         { status: 401 }
@@ -43,23 +34,16 @@ export async function POST(request: Request) {
       sameSite: 'lax' as const,
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7일
-      domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : undefined // 도메인 설정 추가
     };
 
     // isLoggedIn 쿠키 설정
-    response.cookies.set({
-      name: 'isLoggedIn',
-      value: 'true',
-      ...cookieOptions
-    });
-
+    response.cookies.set('isLoggedIn', 'true', cookieOptions);
+    
     // userId 쿠키 설정
-    response.cookies.set({
-      name: 'userId',
-      value: user.id,
-      ...cookieOptions
-    });
+    response.cookies.set('userId', user.id, cookieOptions);
 
+    console.log('Login successful - Cookies set:', response.cookies.getAll());
+    
     return response;
 
   } catch (error) {
