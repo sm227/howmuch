@@ -43,6 +43,7 @@ export async function POST(request: Request) {
       sameSite: 'lax' as const,
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7일
+      domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : undefined // 도메인 설정 추가
     };
 
     // isLoggedIn 쿠키 설정
