@@ -1,63 +1,56 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    
+    const { id } = params;
     const body = await request.json();
-    const { date, startTime, endTime, breakTime, wage, totalWage } = body;
-
-    const workDate = new Date(date);
-    const [startHour, startMinute] = startTime.split(':').map(Number);
-    const [endHour, endMinute] = endTime.split(':').map(Number);
-
-    const startDateTime = new Date(workDate);
-    startDateTime.setHours(startHour, startMinute, 0, 0);
-
-    const endDateTime = new Date(workDate);
-    endDateTime.setHours(endHour, endMinute, 0, 0);
     
-    if (endDateTime < startDateTime) {
-      endDateTime.setDate(endDateTime.getDate() + 1);
-    }
-
     const workRecord = await prisma.workRecord.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: {
-        date: workDate,
-        startTime: startDateTime,
-        endTime: endDateTime,
-        breakTime,
-        wage,
-        totalWage,
+        ...body,
+        date: new Date(body.date),
+        startTime: new Date(body.startTime),
+        endTime: new Date(body.endTime),
       },
     });
-
+    
     return NextResponse.json(workRecord);
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-      status: 500,
-    });
+    console.error('Failed to update work record:', error);
+    return NextResponse.json(
+      { error: '업데이트 실패' },
+      { status: 500 }
+    );
   }
 }
 
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
+    const cookieStore = cookies();
+    const userId = cookieStore.get('userId')?.value;
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: '인증이 필요합니다.' },
+        { status: 401 }
+      );
+    }
     
     const id = parseInt(params.id);
     await prisma.workRecord.delete({
-      where: { id },
+      where: { 
+        id,
+        userId // 자신의 기록만 삭제할 수 있도록
+      },
     });
 
     return NextResponse.json({ success: true });

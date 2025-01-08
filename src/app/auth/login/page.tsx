@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function LoginPage() {
+const LoginPage = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,11 +32,11 @@ export default function LoginPage() {
         throw new Error(data.error || '로그인에 실패했습니다.');
       }
 
-      // 로그인 성공 시 홈이지 새로고침 후 홈으로 이동
-      window.location.href = '/';
+      router.push('/');
+      router.refresh();
       
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('로그인 에러:', error);
       setError(error instanceof Error ? error.message : '로그인에 실패했습니다.');
     } finally {
       setIsLoading(false);
@@ -104,4 +104,6 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+};
+
+export default LoginPage; 
