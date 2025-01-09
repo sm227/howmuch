@@ -17,7 +17,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 세션 쿠키만 설정
     const response = NextResponse.json({ 
       success: true,
       user: {
@@ -27,19 +26,19 @@ export async function POST(request: Request) {
       }
     });
 
-    // 단순한 세션 쿠키 하나만 설정
+    // 단순한 세션 쿠키 설정
     response.cookies.set('session', user.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
       path: '/',
+      sameSite: 'lax',
+      secure: false, // HTTPS가 없어도 동작하도록
+      httpOnly: true,
       maxAge: 60 * 60 * 24 * 7, // 7일
     });
 
     return response;
 
   } catch (error) {
-    console.error('Failed to login:', error);
+    console.error('로그인 실패:', error);
     return NextResponse.json(
       { error: '로그인에 실패했습니다.' },
       { status: 500 }

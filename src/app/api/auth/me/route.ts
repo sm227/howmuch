@@ -2,13 +2,12 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const cookieStore = await cookies();
-    const isLoggedIn = cookieStore.get('isLoggedIn')?.value === 'true';
-    const userId = cookieStore.get('userId')?.value;
+    const userId = await cookieStore.get('session')?.value;
 
-    if (!isLoggedIn || !userId) {
+    if (!userId) {
       return NextResponse.json(
         { error: '인증이 필요합니다.' },
         { status: 401 }
@@ -34,7 +33,7 @@ export async function GET(request: Request) {
       }
     });
   } catch (error) {
-    console.error('Failed to fetch user info:', error);
+    console.error('사용자 정보 조회 실패:', error);
     return NextResponse.json(
       { error: '사용자 정보를 가져오는데 실패했습니다.' },
       { status: 500 }
