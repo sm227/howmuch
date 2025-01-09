@@ -215,6 +215,7 @@ export default function WorkRegisterModal({
       setIsSubmitting(true);
       const response = await fetch(`/api/work-records/${workRecord.id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -257,6 +258,7 @@ export default function WorkRegisterModal({
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           date: submitDate.toISOString(),
           startTime,

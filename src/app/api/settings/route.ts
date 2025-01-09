@@ -1,16 +1,30 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { cookies } from 'next/headers';
 
 export async function GET() {
   try {
-    let settings = await prisma.settings.findFirst();
-    
+    const cookieStore = await cookies();
+    const session = cookieStore.get('session')?.value;
+
+    if (!session) {
+      return NextResponse.json(
+        { error: '인증이 필요합니다.' },
+        { status: 401 }
+      );
+    }
+
+    // 사용자의 설정을 가져오거나, 없으면 생성
+    let settings = await prisma.settings.findUnique({
+      where: { userId: session },
+    });
+
     if (!settings) {
       settings = await prisma.settings.create({
         data: {
-          hourlyWage: 9860,
+          userId: session,
+          hourlyWage: 9860,  // 기본 시급
           autoBreakTime: true,
-          updatedAt: new Date(),
         },
       });
     }
@@ -27,29 +41,32 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
+    const cookieStore = await cookies();
+    const session = cookieStore.get('session')?.value;
+
+    if (!session) {
+      return NextResponse.json(
+        { error: '인증이 필요합니다.' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { hourlyWage, autoBreakTime } = body;
 
-    let settings = await prisma.settings.findFirst();
-
-    if (settings) {
-      settings = await prisma.settings.update({
-        where: { id: settings.id },
-        data: { 
-          hourlyWage,
-          autoBreakTime,
-          updatedAt: new Date(),
-        },
-      });
-    } else {
-      settings = await prisma.settings.create({
-        data: { 
-          hourlyWage,
-          autoBreakTime,
-          updatedAt: new Date(),
-        },
-      });
-    }
+    // upsert를 사용하여 설정을 업데이트하거나 생성
+    const settings = await prisma.settings.upsert({
+      where: { userId: session },
+      update: {
+        hourlyWage,
+        autoBreakTime,
+      },
+      create: {
+        userId: session,
+        hourlyWage,
+        autoBreakTime,
+      },
+    });
 
     return NextResponse.json(settings);
   } catch (error) {

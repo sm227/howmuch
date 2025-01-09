@@ -5,10 +5,9 @@ import { cookies } from 'next/headers';
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
-    const isLoggedIn = cookieStore.get('isLoggedIn')?.value === 'true';
-    const userId = cookieStore.get('userId')?.value;
+    const session = cookieStore.get('session')?.value;
 
-    if (!isLoggedIn || !userId) {
+    if (!session) {
       return NextResponse.json(
         { error: '인증이 필요합니다.' },
         { status: 401 }
@@ -36,7 +35,7 @@ export async function POST(request: Request) {
 
     const workRecord = await prisma.workRecord.create({
       data: {
-        userId,
+        userId: session,
         date: workDate,
         startTime: startDateTime,
         endTime: endDateTime,
