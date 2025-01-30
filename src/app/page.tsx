@@ -156,10 +156,6 @@ export default function Home() {
               </div>
               <div className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
                 <div className="flex justify-between">
-                  <span>세금 (3.3%)</span>
-                  <span>-{monthlyDeductions.tax.toLocaleString()}원</span>
-                </div>
-                <div className="flex justify-between">
                   <span>4대보험 (9.39%)</span>
                   <span>-{monthlyDeductions.insurance.toLocaleString()}원</span>
                 </div>

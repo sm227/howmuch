@@ -386,10 +386,6 @@ export default function WorkRegisterModal({
               
               <div className="text-sm space-y-1">
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>세금 (3.3%)</span>
-                  <span>-{deductions.tax.toLocaleString()}원</span>
-                </div>
-                <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>4대보험 (9.39%)</span>
                   <span>-{deductions.insurance.toLocaleString()}원</span>
                 </div>
